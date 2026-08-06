@@ -2,7 +2,7 @@
 
 A minimal pomodoro timer for macOS, with a popup timer! 
 
-<img width="1512" height="578" alt="Screen Recording 2026-08-06 at 1 02 23 PM" src="https://github.com/user-attachments/assets/0cd15a7c-5c96-4f73-b219-0e36a7d4a52f" />
+<img width="1512" height="578" alt="pomo_demo" src="https://github.com/user-attachments/assets/dd1c0182-c134-4eb2-bf23-6e5e5c1f0adf" />
 
 ## Install
 

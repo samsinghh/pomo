@@ -2,10 +2,14 @@
 
 A minimal pomodoro timer for macOS, with a popup timer!
 
-<img width="1512" height="591" alt="Screenshot 2026-08-06 at 11 12 43 AM" src="https://github.com/user-attachments/assets/1bd0535e-eaaa-48a7-9cd0-f361377cbb6d" />
+<img width="1512" height="620" alt="image" src="https://github.com/user-attachments/assets/a6457b6e-348b-4a4f-8675-8839cfb906d6" />
 
 ## Install
 
+```sh
+brew install samsinghh/tap/pomo
+```
+Or from source:
 ```sh
 git clone https://github.com/samsinghh/pomo.git
 cd pomo
@@ -26,11 +30,4 @@ pomo [work-minutes] [break-minutes]   # defaults: 25 5
 **Example:**
 ```sh
 pomo 25 5
-```
-
-## Development
-
-```sh
-make        # release build into .build/release/pomo
-make test   # run the unit tests
 ```

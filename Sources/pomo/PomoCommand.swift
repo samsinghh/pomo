@@ -7,7 +7,7 @@ struct PomoCommand: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "pomo",
         abstract: "A minimal pomodoro timer for macOS, with a popup timer.",
-        version: "1.0.0")
+        version: "1.1.0")
 
     @Argument(help: "Work minutes.")
     var workMinutes: Double = 25

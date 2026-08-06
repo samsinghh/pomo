@@ -20,8 +20,8 @@ pomo [work-minutes] [break-minutes]   # defaults: 25 5
 
 | Option | Default | |
 |---|---|---|
-| `--sessions <n>` | 4 | work sessions per cycle |
-| `--long-break <minutes>` | 15 | break after the last session |
+| `--sessions/-s <n>` | 4 | work sessions per cycle |
+| `--long-break/-l <minutes>` | 15 | break after the last session |
 
 **Example:**
 ```sh

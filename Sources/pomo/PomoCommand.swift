@@ -15,10 +15,10 @@ struct PomoCommand: ParsableCommand {
     @Argument(help: "Break minutes.")
     var breakMinutes: Double = 5
 
-    @Option(name: .customLong("sessions"), help: "Work sessions per cycle.")
+    @Option(name: [.customShort("s"), .customLong("sessions")], help: "Work sessions per cycle.")
     var sessions: Int = 4
 
-    @Option(name: .customLong("long-break"),
+    @Option(name: [.customShort("l"), .customLong("long-break")],
             help: "Long break minutes after the last session of a cycle.")
     var longBreak: Double = 15
 

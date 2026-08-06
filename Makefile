@@ -1,13 +1,25 @@
 PREFIX ?= /usr/local
 
-pomo: pomo.swift
-	swiftc -O pomo.swift -o pomo
+CLT := /Library/Developer/CommandLineTools
+ifeq ($(shell xcode-select -p),$(CLT))
+TEST_FLAGS := --disable-xctest \
+	-Xswiftc -F -Xswiftc $(CLT)/Library/Developer/Frameworks \
+	-Xlinker -F -Xlinker $(CLT)/Library/Developer/Frameworks \
+	-Xlinker -rpath -Xlinker $(CLT)/Library/Developer/Frameworks \
+	-Xlinker -rpath -Xlinker $(CLT)/Library/Developer/usr/lib
+endif
 
-.PHONY: install clean
+.PHONY: all test install clean
 
-install: pomo
+all:
+	swift build -c release
+
+test:
+	swift test $(TEST_FLAGS)
+
+install: all
 	install -d $(PREFIX)/bin
-	install pomo $(PREFIX)/bin/pomo
+	install .build/release/pomo $(PREFIX)/bin/pomo
 
 clean:
-	rm -f pomo
+	rm -rf .build

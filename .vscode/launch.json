@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:pomo}",
+            "name": "Debug pomo",
+            "target": "pomo",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug pomo"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:pomo}",
+            "name": "Release pomo",
+            "target": "pomo",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release pomo"
+        }
+    ]
+}

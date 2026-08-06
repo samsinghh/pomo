@@ -1,11 +1,5 @@
 import AppKit
-
-let args = CommandLine.arguments
-guard args.count == 3, let workMin = Double(args[1]), let breakMin = Double(args[2]),
-      workMin > 0, breakMin > 0 else {
-    FileHandle.standardError.write(Data("usage: pomo WORK_MINUTES BREAK_MINUTES\n".utf8))
-    exit(2)
-}
+import PomoKit
 
 final class ChipView: NSView {
     var onHover: ((Bool) -> Void)?
@@ -23,13 +17,10 @@ final class ChipView: NSView {
 }
 
 @MainActor
-final class Pomo: NSObject {
+final class PomoApp: NSObject {
     private let workColor = NSColor(red: 0.85, green: 0.33, blue: 0.31, alpha: 1)
     private let breakColor = NSColor(red: 0.36, green: 0.72, blue: 0.36, alpha: 1)
     private let pausedColor = NSColor(white: 0.45, alpha: 1)
-
-    private let workSeconds: TimeInterval
-    private let breakSeconds: TimeInterval
 
     private let window: NSWindow
     private let chip = ChipView()
@@ -37,14 +28,10 @@ final class Pomo: NSObject {
     private let timeLabel = NSTextField(labelWithString: "")
     private let closeButton = NSButton()
 
-    private var onBreak = false
-    private var phaseEnd = Date()
-    private var paused = false
-    private var pausedRemaining: TimeInterval = 0
+    private var timer: PomoTimer
 
-    init(workMinutes: Double, breakMinutes: Double) {
-        workSeconds = workMinutes * 60
-        breakSeconds = breakMinutes * 60
+    init(configuration: PomoConfiguration) {
+        timer = PomoTimer(configuration: configuration, start: Date())
 
         let size = CGSize(width: 220, height: 100)
         let visible = NSScreen.main!.visibleFrame
@@ -113,42 +100,27 @@ final class Pomo: NSObject {
     }
 
     func run() {
-        startPhase(isBreak: false)
-        tick()
+        refresh()
         Timer.scheduledTimer(timeInterval: 0.2, target: self, selector: #selector(tick),
                              userInfo: nil, repeats: true)
         window.makeKeyAndOrderFront(nil)
     }
 
-    private func startPhase(isBreak: Bool) {
-        onBreak = isBreak
-        phaseEnd = Date().addingTimeInterval(isBreak ? breakSeconds : workSeconds)
-        phaseLabel.stringValue = isBreak ? "BREAK" : "WORK"
-        chip.layer!.backgroundColor = (isBreak ? breakColor : workColor).cgColor
-    }
-
     @objc private func tick() {
-        guard !paused else { return }
-        var remaining = phaseEnd.timeIntervalSinceNow
-        if remaining <= 0 {
-            NSSound.beep()
-            startPhase(isBreak: !onBreak)
-            remaining = phaseEnd.timeIntervalSinceNow
-        }
-        let total = Int(remaining.rounded(.up))
-        timeLabel.stringValue = String(format: "%02d:%02d", total / 60, total % 60)
+        if timer.advance(to: Date()) > 0 { NSSound.beep() }
+        refresh()
     }
 
-    private func togglePause() {
-        paused.toggle()
-        if paused {
-            pausedRemaining = max(phaseEnd.timeIntervalSinceNow, 0)
+    private func refresh() {
+        timeLabel.stringValue = formatMMSS(timer.remaining(at: Date()))
+        if timer.isPaused {
             phaseLabel.stringValue = "PAUSED"
             chip.layer!.backgroundColor = pausedColor.cgColor
         } else {
-            phaseEnd = Date().addingTimeInterval(pausedRemaining)
-            phaseLabel.stringValue = onBreak ? "BREAK" : "WORK"
-            chip.layer!.backgroundColor = (onBreak ? breakColor : workColor).cgColor
+            phaseLabel.stringValue =
+                timer.phase.label(sessionsPerCycle: timer.configuration.sessionsPerCycle)
+            chip.layer!.backgroundColor =
+                (timer.phase.isWork ? workColor : breakColor).cgColor
         }
     }
 
@@ -156,22 +128,7 @@ final class Pomo: NSObject {
         if closeButton.frame.insetBy(dx: -8, dy: -8).contains(sender.location(in: chip)) {
             exit(0)
         }
-        togglePause()
+        timer.togglePause(at: Date())
+        refresh()
     }
 }
-
-let app = NSApplication.shared
-app.setActivationPolicy(.accessory)
-
-let pomo = MainActor.assumeIsolated { () -> Pomo in
-    let p = Pomo(workMinutes: workMin, breakMinutes: breakMin)
-    p.run()
-    return p
-}
-
-signal(SIGINT, SIG_IGN)
-let sigint = DispatchSource.makeSignalSource(signal: SIGINT, queue: .main)
-sigint.setEventHandler { exit(0) }
-sigint.resume()
-
-app.run()
